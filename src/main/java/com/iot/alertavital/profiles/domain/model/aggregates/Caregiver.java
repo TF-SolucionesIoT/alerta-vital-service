@@ -1,0 +1,28 @@
+package com.iot.alertavital.profiles.domain.model.aggregates;
+
+import com.iot.alertavital.iam.domain.model.aggregates.User;
+import com.iot.alertavital.profiles.domain.model.valueobjects.PhoneNumber;
+import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+import jakarta.persistence.*;
+
+@Entity
+public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "number", column = @Column(name = "phone_number"))})
+    private PhoneNumber phoneNumber;
+
+    public Caregiver() {
+    }
+
+    public Caregiver( PhoneNumber phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+}
