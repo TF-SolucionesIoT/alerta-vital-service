@@ -4,6 +4,7 @@ import com.iot.alertavital.iam.domain.model.commands.SignUpCommand;
 import com.iot.alertavital.iam.domain.model.valueobjects.EmailAddress;
 import com.iot.alertavital.iam.domain.model.valueobjects.Gender;
 import com.iot.alertavital.iam.domain.model.valueobjects.PersonName;
+import com.iot.alertavital.profiles.domain.model.aggregates.Patient;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -44,8 +45,8 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     @Column(nullable = false)
     private Gender gender;
 
-
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Patient patient;
 
     public User(){}
 

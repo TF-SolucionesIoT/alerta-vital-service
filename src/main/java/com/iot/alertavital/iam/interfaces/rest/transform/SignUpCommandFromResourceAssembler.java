@@ -12,7 +12,8 @@ public class SignUpCommandFromResourceAssembler {
                 resource.email(),
                 resource.gender(),
                 resource.username(),
-                resource.password()
+                resource.password(),
+                resource.birthday()
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.iot.alertavital.iam.application.internal;
 
+import com.iot.alertavital.iam.application.acl.ProfilesContextAdapter;
 import com.iot.alertavital.iam.application.external.results.AuthResponseResult;
 import com.iot.alertavital.iam.application.external.results.RegisterResponseResult;
 import com.iot.alertavital.iam.application.internal.services.AuthService;
@@ -18,11 +19,13 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ProfilesContextAdapter profilesContextAdapter;
 
-    public AuthServiceImpl(JwtService jwtService, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(JwtService jwtService, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, ProfilesContextAdapter profilesContextAdapter) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.profilesContextAdapter = profilesContextAdapter;
     }
 
     public AuthResponseResult login(SignInCommand command) {
@@ -52,6 +55,8 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new IllegalArgumentException("un error ha ocurrido mientras se guarda el usuario" + e.getMessage());
         }
+
+        profilesContextAdapter.createPatientForUser(user, command.birthday());
 
         String accessToken = jwtService.generateAccessToken(String.valueOf(user.getId()));
         String refreshToken = jwtService.generateRefreshToken(String.valueOf(user.getId()));

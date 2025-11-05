@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 @Entity
 public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -21,8 +21,13 @@ public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
     public Caregiver() {
     }
 
-    public Caregiver( PhoneNumber phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public Caregiver(User user, String phoneNumber) {
+        this.user = user;
+        this.phoneNumber = new PhoneNumber(phoneNumber);
     }
+
+
+
+
 
 }

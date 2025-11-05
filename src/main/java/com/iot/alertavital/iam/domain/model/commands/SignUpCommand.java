@@ -1,6 +1,8 @@
 package com.iot.alertavital.iam.domain.model.commands;
 
-public record SignUpCommand(String firstName, String lastName, String email, String gender, String username, String password) {
+import java.time.LocalDate;
+
+public record SignUpCommand(String firstName, String lastName, String email, String gender, String username, String password, LocalDate birthday) {
     public SignUpCommand {
         if (firstName.isEmpty() || firstName.length() < 3) {
             throw new IllegalArgumentException("First name must be at least 3 characters");
