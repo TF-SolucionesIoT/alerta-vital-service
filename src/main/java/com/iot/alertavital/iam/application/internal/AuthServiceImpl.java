@@ -6,7 +6,8 @@ import com.iot.alertavital.iam.application.external.results.RegisterResponseResu
 import com.iot.alertavital.iam.application.internal.services.AuthService;
 import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.iam.domain.model.commands.SignInCommand;
-import com.iot.alertavital.iam.domain.model.commands.SignUpCommand;
+import com.iot.alertavital.iam.domain.model.commands.SignUpCaregiverCommand;
+import com.iot.alertavital.iam.domain.model.commands.SignUpPatientCommand;
 import com.iot.alertavital.iam.domain.services.JwtService;
 import com.iot.alertavital.iam.infrastructure.repositories.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public RegisterResponseResult register(SignUpCommand command) {
+    public RegisterResponseResult register(SignUpPatientCommand command) {
         if (userRepository.findByUsername(command.username()).isPresent()) {
             throw new IllegalArgumentException("el nombre de usuario ya esta en uso");
         }
@@ -64,6 +65,28 @@ public class AuthServiceImpl implements AuthService {
         return new RegisterResponseResult(accessToken, refreshToken, user.getUsername());
     }
 
+    @Override
+    public RegisterResponseResult register(SignUpCaregiverCommand command) {
+        if (userRepository.findByUsername(command.username()).isPresent()) {
+            throw new IllegalArgumentException("el nombre de usuario ya esta en uso");
+        }
+
+        String hashedPassword = passwordEncoder.encode(command.password());
+
+        var user = new User(command, hashedPassword);
+        try {
+            userRepository.save(user);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("un error ha ocurrido mientras se guarda el usuario" + e.getMessage());
+        }
+
+        profilesContextAdapter.createCaregiverForUser(user, command.phoneNumber());
+
+        String accessToken = jwtService.generateAccessToken(String.valueOf(user.getId()));
+        String refreshToken = jwtService.generateRefreshToken(String.valueOf(user.getId()));
+
+        return new RegisterResponseResult(accessToken, refreshToken, user.getUsername());
+    }
 
 
 }

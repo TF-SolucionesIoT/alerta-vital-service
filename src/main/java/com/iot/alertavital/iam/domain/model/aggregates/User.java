@@ -1,6 +1,7 @@
 package com.iot.alertavital.iam.domain.model.aggregates;
 
-import com.iot.alertavital.iam.domain.model.commands.SignUpCommand;
+import com.iot.alertavital.iam.domain.model.commands.SignUpCaregiverCommand;
+import com.iot.alertavital.iam.domain.model.commands.SignUpPatientCommand;
 import com.iot.alertavital.iam.domain.model.valueobjects.EmailAddress;
 import com.iot.alertavital.iam.domain.model.valueobjects.Gender;
 import com.iot.alertavital.iam.domain.model.valueobjects.PersonName;
@@ -38,7 +39,9 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     // a una columna llamada "email" en la tabla de la entidad principal.
     @AttributeOverrides({
             @AttributeOverride(name = "address", column = @Column(name = "email"))})
+    @Column(unique = true)
     private EmailAddress email;
+
     private Boolean is_active;
 
     @Enumerated(EnumType.STRING)
@@ -117,7 +120,16 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     }
 
 
-    public User(SignUpCommand command, String encryptedPassword){
+    public User(SignUpPatientCommand command, String encryptedPassword){
+        this.name = new PersonName(command.firstName(), command.lastName());
+        this.email = new EmailAddress(command.email());
+        this.gender = Gender.valueOf(command.gender().toUpperCase());
+        this.username = command.username();
+        this.password = encryptedPassword;
+        this.is_active = true;
+    }
+
+    public User(SignUpCaregiverCommand command, String encryptedPassword){
         this.name = new PersonName(command.firstName(), command.lastName());
         this.email = new EmailAddress(command.email());
         this.gender = Gender.valueOf(command.gender().toUpperCase());
