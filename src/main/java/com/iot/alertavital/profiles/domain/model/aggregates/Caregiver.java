@@ -32,6 +32,28 @@ public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
         this.user = command.user();
     }
 
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = new PhoneNumber(phoneNumber);
+    }
+
+    // Getters
+    public User getUser() {
+        return user;
+    }
+
+    public PhoneNumber getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    // Setters
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setPhoneNumber(PhoneNumber phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
 
 
 

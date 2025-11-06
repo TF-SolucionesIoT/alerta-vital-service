@@ -9,6 +9,7 @@ import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggre
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,27 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
         this.user = user;
     }
 
+    public void updateBirthday(LocalDate birthday) {
+        this.birthday = new Birthday(birthday);
+    }
+
+    // Getters
+    public User getUser() {
+        return user;
+    }
+
+    public Birthday getBirthday() {
+        return birthday;
+    }
+
+    // Setters
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setBirthday(Birthday birthday) {
+        this.birthday = birthday;
+    }
 
 
     public void addDisturbance(Disturbances disturbance) {

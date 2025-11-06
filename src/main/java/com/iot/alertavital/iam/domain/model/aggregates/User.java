@@ -84,6 +84,20 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.email = new EmailAddress(email);
     }
 
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateInformation(String firstName, String lastName, String email, String username) {
+        this.name = new PersonName(firstName, lastName);
+        this.email = new EmailAddress(email);
+        this.username = username;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.emptyList();
