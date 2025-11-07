@@ -2,7 +2,7 @@ package com.iot.alertavital.profiles.domain.model.aggregates;
 
 
 import com.iot.alertavital.iam.domain.model.aggregates.User;
-import com.iot.alertavital.healthtracking.domain.model.entities.Disturbances;
+import com.iot.alertavital.healthtracking.domain.model.aggregates.Disturbance;
 import com.iot.alertavital.profiles.domain.model.commands.CreatePatientCommand;
 import com.iot.alertavital.profiles.domain.model.valueobjects.Birthday;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -15,6 +15,7 @@ import java.util.List;
 @Entity
 public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
+    @Getter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
@@ -28,7 +29,7 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
     @Getter
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Disturbances> disturbances = new ArrayList<>();
+    private List<Disturbance> disturbances = new ArrayList<>();
 
 
     public Patient() {
@@ -45,12 +46,12 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
 
 
-    public void addDisturbance(Disturbances disturbance) {
+    public void addDisturbance(Disturbance disturbance) {
         disturbances.add(disturbance);
         disturbance.setPatient(this);
     }
 
-    public void removeDisturbance(Disturbances disturbance) {
+    public void removeDisturbance(Disturbance disturbance) {
         disturbances.remove(disturbance);
         disturbance.setPatient(null);
     }
