@@ -2,6 +2,7 @@ package com.iot.alertavital.healthtracking.application.internal;
 
 import com.iot.alertavital.healthtracking.domain.model.aggregates.Disturbance;
 import com.iot.alertavital.healthtracking.domain.model.commands.CreateDisturbanceCommand;
+import com.iot.alertavital.healthtracking.domain.model.commands.DeleteDisturbanceCommand;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceCommandService;
 import com.iot.alertavital.healthtracking.infrastructure.repositories.DisturbanceRepository;
 import com.iot.alertavital.iam.domain.services.JwtService;
@@ -47,5 +48,18 @@ public class DisturbanceCommandServiceImpl implements DisturbanceCommandService 
         }
 
         return Optional.of(disturbance);
+    }
+
+    @Override
+    public void handle(DeleteDisturbanceCommand command) {
+        Long userId = authenticatedUserProvider.getCurrentUserId();
+        var disturbance = disturbanceRepository.findDisturbanceByIdAndPatient_User_Id(command.id(), userId).orElseThrow(() -> new IllegalArgumentException("Disturbance does not exist"));
+
+        try {
+            disturbanceRepository.delete(disturbance);
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException("Disturbance could not be deleted: " + e.getMessage());
+        }
     }
 }

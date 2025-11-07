@@ -1,6 +1,7 @@
 package com.iot.alertavital.healthtracking.interfaces.rest;
 
 
+import com.iot.alertavital.healthtracking.domain.model.commands.DeleteDisturbanceCommand;
 import com.iot.alertavital.healthtracking.domain.model.queries.GetAllDisturbancesByPatientIdQuery;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceCommandService;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceQueryService;
@@ -27,9 +28,10 @@ public class RecordsController {
         this.disturbanceQueryService = disturbanceQueryService;
     }
 
-    @PostMapping
+    @PostMapping("/disturbances")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "disturbance created")
+            @ApiResponse(responseCode = "201", description = "disturbance created"),
+            @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     public ResponseEntity<CreateDisturbanceResponse> createDisturbance(@RequestBody CreateDisturbanceRequest request) {
         var createDisturbance = CreateDisturbanceCommandFromResourceAssembler.toCommand(request);
@@ -44,9 +46,11 @@ public class RecordsController {
 
     }
 
-    @GetMapping
+    @GetMapping("/disturbances/all")
+
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "disturbances has been founded")
+            @ApiResponse(responseCode = "200", description = "disturbances found"),
+            @ApiResponse(responseCode = "404", description = "disturbances not found")
     })
     public ResponseEntity<List<GetAllDisturbanceByPatientResponse>> getAllDisturbanceByPatient() {
         var list = disturbanceQueryService.handle(new GetAllDisturbancesByPatientIdQuery());
@@ -58,5 +62,15 @@ public class RecordsController {
         var resources = list.stream().map(DisturbanceResourceFromEntityAssembler::toResource).toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @DeleteMapping("/disturbances")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Deleted disturbance"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+    })
+    public ResponseEntity<?> deleteDisturbance(@RequestBody Long disturbanceId){
+        disturbanceCommandService.handle(new DeleteDisturbanceCommand(disturbanceId));
+        return ResponseEntity.noContent().build();
     }
 }

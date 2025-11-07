@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface DisturbanceRepository extends JpaRepository<Disturbance, Long> {
     boolean existsDisturbanceByNameAndOnsetDate(String name, LocalDate onsetDate);
     List<Disturbance> findAllByPatient_User_IdOrderByOnsetDateDesc(Long id);
+    Optional<Disturbance> findDisturbanceByIdAndPatient_User_Id(Long id, Long userId);
 
 }
