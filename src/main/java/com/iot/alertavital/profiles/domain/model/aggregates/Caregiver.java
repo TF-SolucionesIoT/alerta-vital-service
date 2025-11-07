@@ -1,12 +1,18 @@
 package com.iot.alertavital.profiles.domain.model.aggregates;
 
 import com.iot.alertavital.iam.domain.model.aggregates.User;
-import com.iot.alertavital.profiles.domain.model.commands.CreateCaregiverCommand;
+import com.iot.alertavital.profiles.domain.model.commands.CreateProfileCommand;
 import com.iot.alertavital.profiles.domain.model.valueobjects.PhoneNumber;
+import com.iot.alertavital.profiles.domain.model.valueobjects.UserType;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@SuppressWarnings("unused")
 public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -27,7 +33,14 @@ public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
         this.phoneNumber = new PhoneNumber(phoneNumber);
     }
 
-    public Caregiver(CreateCaregiverCommand command) {
+    // Constructor actualizado para usar el comando unificado CreateProfileCommand
+    public Caregiver(CreateProfileCommand command) {
+        if (command == null) {
+            throw new IllegalArgumentException("CreateProfileCommand no puede ser nulo");
+        }
+        if (command.userType() != UserType.CAREGIVER) {
+            throw new IllegalArgumentException("CreateProfileCommand debe tener userType=CAREGIVER para crear un Caregiver");
+        }
         this.phoneNumber = new PhoneNumber(command.phoneNumber());
         this.user = command.user();
     }
@@ -35,25 +48,6 @@ public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
     public void updatePhoneNumber(String phoneNumber) {
         this.phoneNumber = new PhoneNumber(phoneNumber);
     }
-
-    // Getters
-    public User getUser() {
-        return user;
-    }
-
-    public PhoneNumber getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    // Setters
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setPhoneNumber(PhoneNumber phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
 
 
 

@@ -3,17 +3,22 @@ package com.iot.alertavital.profiles.domain.model.aggregates;
 
 import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.healthtracking.domain.model.entities.Disturbances;
-import com.iot.alertavital.profiles.domain.model.commands.CreatePatientCommand;
+import com.iot.alertavital.profiles.domain.model.commands.CreateProfileCommand;
 import com.iot.alertavital.profiles.domain.model.valueobjects.Birthday;
+import com.iot.alertavital.profiles.domain.model.valueobjects.UserType;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@SuppressWarnings("unused")
 public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -35,10 +40,18 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
     public Patient() {
     }
 
-    public Patient(CreatePatientCommand command) {
-        this.birthday = new Birthday(command.date());
+    // Constructor actualizado para usar el comando unificado CreateProfileCommand
+    public Patient(CreateProfileCommand command) {
+        if (command == null) {
+            throw new IllegalArgumentException("CreateProfileCommand no puede ser nulo");
+        }
+        if (command.userType() != UserType.PATIENT) {
+            throw new IllegalArgumentException("CreateProfileCommand debe tener userType=PATIENT para crear un Patient");
+        }
+        this.birthday = new Birthday(command.birthday());
         this.user = command.user();
     }
+
     public Patient(User user, Birthday birthday) {
         this.birthday = birthday;
         this.user = user;
@@ -47,25 +60,6 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
     public void updateBirthday(LocalDate birthday) {
         this.birthday = new Birthday(birthday);
     }
-
-    // Getters
-    public User getUser() {
-        return user;
-    }
-
-    public Birthday getBirthday() {
-        return birthday;
-    }
-
-    // Setters
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setBirthday(Birthday birthday) {
-        this.birthday = birthday;
-    }
-
 
     public void addDisturbance(Disturbances disturbance) {
         disturbances.add(disturbance);

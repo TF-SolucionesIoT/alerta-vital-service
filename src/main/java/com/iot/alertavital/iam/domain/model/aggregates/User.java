@@ -5,7 +5,9 @@ import com.iot.alertavital.iam.domain.model.commands.SignUpPatientCommand;
 import com.iot.alertavital.iam.domain.model.valueobjects.EmailAddress;
 import com.iot.alertavital.iam.domain.model.valueobjects.Gender;
 import com.iot.alertavital.iam.domain.model.valueobjects.PersonName;
-import com.iot.alertavital.profiles.domain.model.aggregates.Patient;
+import com.iot.alertavital.profiles.domain.model.valueobjects.UserType;
+import com.iot.alertavital.profiles.domain.model.valueobjects.PhoneNumber;
+import com.iot.alertavital.profiles.domain.model.valueobjects.Birthday;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +17,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -48,29 +51,43 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     @Column(nullable = false)
     private Gender gender;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Patient patient;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserType userType;
+
+    // Campos específicos de Caregiver (opcional)
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "number", column = @Column(name = "phone_number"))})
+    private PhoneNumber phoneNumber;
+
+    // Campos específicos de Patient (opcional)
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "birthday", column = @Column(name = "birthday"))})
+    private Birthday birthday;
 
     public User(){}
 
 
-    public User(String username, String password, PersonName name, EmailAddress email, String gender) {
+    public User(String username, String password, PersonName name, EmailAddress email, String gender, UserType userType) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.email = email;
         this.gender = Gender.valueOf(gender);
+        this.userType = userType;
         this.is_active = true;
     }
 
-    public User(String username, String password, String name, String lastName, String email, String gender) {
+    public User(String username, String password, String name, String lastName, String email, String gender, UserType userType) {
         this.username = username;
         this.password = password;
         this.name = new PersonName(name, lastName);
         this.email = new EmailAddress(email);
         this.gender = Gender.valueOf(gender);
+        this.userType = userType;
         this.is_active = true;
-
     }
 
     public String fullName() { return name.FullName();}
@@ -96,6 +113,53 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.name = new PersonName(firstName, lastName);
         this.email = new EmailAddress(email);
         this.username = username;
+    }
+
+    // Métodos específicos para Caregiver
+    public void updatePhoneNumber(String phoneNumber) {
+        if (this.userType == UserType.CAREGIVER) {
+            this.phoneNumber = new PhoneNumber(phoneNumber);
+        } else {
+            throw new IllegalArgumentException("Solo los cuidadores pueden tener número de teléfono");
+        }
+    }
+
+    public String getPhoneNumber() {
+        return this.phoneNumber != null ? this.phoneNumber.number() : null;
+    }
+
+    // Métodos específicos para Patient
+    public void updateBirthday(LocalDate birthday) {
+        if (this.userType == UserType.PATIENT) {
+            this.birthday = new Birthday(birthday);
+        } else {
+            throw new IllegalArgumentException("Solo los pacientes pueden tener fecha de nacimiento");
+        }
+    }
+
+    public LocalDate getBirthday() {
+        return this.birthday != null ? this.birthday.birthday() : null;
+    }
+
+    // Getters adicionales
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public boolean isCaregiver() {
+        return this.userType == UserType.CAREGIVER;
+    }
+
+    public boolean isPatient() {
+        return this.userType == UserType.PATIENT;
     }
 
     @Override
@@ -140,7 +204,12 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.gender = Gender.valueOf(command.gender().toUpperCase());
         this.username = command.username();
         this.password = encryptedPassword;
+        this.userType = UserType.PATIENT;
         this.is_active = true;
+        // Inicializar campos específicos de paciente si están en el comando
+        if (command.birthday() != null) {
+            this.birthday = new Birthday(command.birthday());
+        }
     }
 
     public User(SignUpCaregiverCommand command, String encryptedPassword){
@@ -149,7 +218,16 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.gender = Gender.valueOf(command.gender().toUpperCase());
         this.username = command.username();
         this.password = encryptedPassword;
+        this.userType = UserType.CAREGIVER;
         this.is_active = true;
+        // Inicializar campos específicos de cuidador si están en el comando
+        if (command.phoneNumber() != null) {
+            this.phoneNumber = new PhoneNumber(command.phoneNumber());
+        }
     }
 
+    // Getter para ID (requerido por JPA y usado en servicios)
+    public Long getId() {
+        return super.getId();
+    }
 }
