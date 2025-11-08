@@ -2,15 +2,25 @@ package com.iot.alertavital.healthtracking.interfaces.rest;
 
 
 import com.iot.alertavital.healthtracking.domain.model.commands.DeleteDisturbanceCommand;
+import com.iot.alertavital.healthtracking.domain.model.commands.DeleteSymptonCommand;
 import com.iot.alertavital.healthtracking.domain.model.queries.GetAllDisturbancesByPatientIdQuery;
+import com.iot.alertavital.healthtracking.domain.model.queries.GetAllSymptonsByPatientIdQuery;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceCommandService;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceQueryService;
+import com.iot.alertavital.healthtracking.domain.services.SymptonCommandService;
+import com.iot.alertavital.healthtracking.domain.services.SymptonQueryService;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateDisturbanceRequest;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateDisturbanceResponse;
+import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateSymptonRequest;
+import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateSymptonResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.GetAllDisturbanceByPatientResponse;
+import com.iot.alertavital.healthtracking.interfaces.rest.resources.GetAllSymptonByPatientResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateDisturbanceCommandFromResourceAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateDisturbanceResponseFromEntityAssembler;
+import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateSymptonCommandFromResourceAssembler;
+import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateSymptonResponseFromEntityAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.DisturbanceResourceFromEntityAssembler;
+import com.iot.alertavital.healthtracking.interfaces.rest.transform.SymptonResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +33,13 @@ import java.util.List;
 public class RecordsController {
     private final DisturbanceCommandService disturbanceCommandService;
     private final DisturbanceQueryService disturbanceQueryService;
-    public RecordsController(DisturbanceCommandService disturbanceCommandService, DisturbanceQueryService disturbanceQueryService) {
+    private final SymptonCommandService symptonCommandService;
+    private final SymptonQueryService symptonQueryService;
+    public RecordsController(DisturbanceCommandService disturbanceCommandService, DisturbanceQueryService disturbanceQueryService, SymptonCommandService symptonCommandService, SymptonQueryService symptonQueryService) {
         this.disturbanceCommandService = disturbanceCommandService;
         this.disturbanceQueryService = disturbanceQueryService;
+        this.symptonCommandService = symptonCommandService;
+        this.symptonQueryService = symptonQueryService;
     }
 
     @PostMapping("/disturbances")
@@ -71,6 +85,52 @@ public class RecordsController {
     })
     public ResponseEntity<?> deleteDisturbance(@RequestBody Long disturbanceId){
         disturbanceCommandService.handle(new DeleteDisturbanceCommand(disturbanceId));
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/symptons")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "sympton created"),
+            @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    public ResponseEntity<CreateSymptonResponse> createSympton(@RequestBody CreateSymptonRequest request) {
+        var createSympton = CreateSymptonCommandFromResourceAssembler.toCommand(request);
+        var optionalResponse = symptonCommandService.handle(createSympton);
+
+        if (optionalResponse.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var response = CreateSymptonResponseFromEntityAssembler.toResponse(optionalResponse.get());
+        return ResponseEntity.ok(response);
+
+    }
+
+    @GetMapping("/symptons/all")
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "symptons found"),
+            @ApiResponse(responseCode = "404", description = "symptons not found")
+    })
+    public ResponseEntity<List<GetAllSymptonByPatientResponse>> getAllSymptonByPatient() {
+        var list = symptonQueryService.handle(new GetAllSymptonsByPatientIdQuery());
+
+        if (list.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var resources = list.stream().map(SymptonResourceFromEntityAssembler::toResource).toList();
+
+        return ResponseEntity.ok(resources);
+    }
+
+    @DeleteMapping("/symptons")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Deleted sympton"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+    })
+    public ResponseEntity<?> deleteSympton(@RequestBody Long symptonId){
+        symptonCommandService.handle(new DeleteSymptonCommand(symptonId));
         return ResponseEntity.noContent().build();
     }
 }
