@@ -5,6 +5,7 @@ import com.iot.alertavital.iam.domain.model.commands.SignUpPatientCommand;
 import com.iot.alertavital.iam.domain.model.valueobjects.EmailAddress;
 import com.iot.alertavital.iam.domain.model.valueobjects.Gender;
 import com.iot.alertavital.iam.domain.model.valueobjects.PersonName;
+import com.iot.alertavital.iam.domain.model.valueobjects.TypeOfUser;
 import com.iot.alertavital.profiles.domain.model.aggregates.Patient;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
@@ -51,7 +52,9 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Patient patient;
 
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TypeOfUser typeOfUser;
 
     public User(){}
 
@@ -129,6 +132,7 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.username = command.username();
         this.password = encryptedPassword;
         this.is_active = true;
+        this.typeOfUser = TypeOfUser.PATIENT;
     }
 
     public User(SignUpCaregiverCommand command, String encryptedPassword){
@@ -138,6 +142,7 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
         this.username = command.username();
         this.password = encryptedPassword;
         this.is_active = true;
+        this.typeOfUser = TypeOfUser.CAREGIVER;
     }
 
 }

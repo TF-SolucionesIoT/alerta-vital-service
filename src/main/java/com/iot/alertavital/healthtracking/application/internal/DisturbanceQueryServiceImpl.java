@@ -9,6 +9,7 @@ import com.iot.alertavital.profiles.infrastructure.repositories.PatientRepositor
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class DisturbanceQueryServiceImpl implements DisturbanceQueryService {
@@ -31,6 +32,9 @@ public class DisturbanceQueryServiceImpl implements DisturbanceQueryService {
     @Override
     public List<Disturbance> handle(GetAllDisturbancesByPatientIdQuery query) {
         Long userId = authenticatedUserProvider.getCurrentUserId();
+        if (!Objects.equals(authenticatedUserProvider.getCurrentUserType(), "PATIENT")){
+           throw new IllegalArgumentException("Only PATIENT users are allowed");
+        }
 
         return disturbanceRepository.findAllByPatient_User_IdOrderByOnsetDateDesc(userId);
     }

@@ -36,8 +36,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Credenciales inválidas");
         }
 
-        String accessToken = jwtService.generateAccessToken(String.valueOf(user.getId()));
-        String refreshToken = jwtService.generateRefreshToken(String.valueOf(user.getId()));
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return new AuthResponseResult(accessToken, refreshToken);
     }
@@ -59,8 +59,8 @@ public class AuthServiceImpl implements AuthService {
 
         profilesContextAdapter.createPatientForUser(user, command.birthday());
 
-        String accessToken = jwtService.generateAccessToken(String.valueOf(user.getId()));
-        String refreshToken = jwtService.generateRefreshToken(String.valueOf(user.getId()));
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return new RegisterResponseResult(accessToken, refreshToken, user.getUsername());
     }
@@ -82,8 +82,8 @@ public class AuthServiceImpl implements AuthService {
 
         profilesContextAdapter.createCaregiverForUser(user, command.phoneNumber());
 
-        String accessToken = jwtService.generateAccessToken(String.valueOf(user.getId()));
-        String refreshToken = jwtService.generateRefreshToken(String.valueOf(user.getId()));
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return new RegisterResponseResult(accessToken, refreshToken, user.getUsername());
     }
