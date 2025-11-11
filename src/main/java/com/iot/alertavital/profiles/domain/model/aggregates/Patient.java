@@ -3,6 +3,7 @@ package com.iot.alertavital.profiles.domain.model.aggregates;
 
 import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.healthtracking.domain.model.aggregates.Disturbance;
+import com.iot.alertavital.monitoring.domain.model.aggregates.Device;
 import com.iot.alertavital.profiles.domain.model.commands.CreatePatientCommand;
 import com.iot.alertavital.profiles.domain.model.valueobjects.Birthday;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
@@ -20,6 +21,8 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL)
+    private Device device;
 
     @Embedded
     @AttributeOverrides({
