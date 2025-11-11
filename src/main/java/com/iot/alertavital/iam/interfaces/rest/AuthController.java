@@ -1,10 +1,7 @@
 package com.iot.alertavital.iam.interfaces.rest;
 
 import com.iot.alertavital.iam.application.internal.services.AuthService;
-import com.iot.alertavital.iam.interfaces.rest.resources.AuthRequestResource;
-import com.iot.alertavital.iam.interfaces.rest.resources.AuthResponseResource;
-import com.iot.alertavital.iam.interfaces.rest.resources.RegisterRequestResource;
-import com.iot.alertavital.iam.interfaces.rest.resources.RegisterResponseResource;
+import com.iot.alertavital.iam.interfaces.rest.resources.*;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInResultToResponseAssembler;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
@@ -37,10 +34,19 @@ public class AuthController {
     }
 
 
-    @PostMapping("/register")
-    public ResponseEntity<RegisterResponseResource> register(@RequestBody RegisterRequestResource registerRequestResource) {
+    @PostMapping("/register/patient")
+    public ResponseEntity<RegisterResponseResource> register(@RequestBody PatientRegisterRequestResource patientRegisterRequestResource) {
 
-        var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromResource(registerRequestResource);
+        var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromPatientResource(patientRegisterRequestResource);
+        var response = authService.register(signUpCommand);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(SignUpResultToResponseAssembler.fromResultToResponse(response));
+    }
+
+    @PostMapping("/register/caregiver")
+    public ResponseEntity<RegisterResponseResource> register(@RequestBody CaregiverRegisterRequestResource caregiverRegisterRequestResource) {
+
+        var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromCaregiverResource(caregiverRegisterRequestResource);
         var response = authService.register(signUpCommand);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(SignUpResultToResponseAssembler.fromResultToResponse(response));

@@ -1,6 +1,7 @@
 package com.iot.alertavital.iam.infrastructure.jwt;
 
 
+import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.iam.domain.services.JwtService;
 
 import io.jsonwebtoken.Jwts;
@@ -12,11 +13,12 @@ import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${security.jwt.secret}")
     private String secretKey;
 
     private final SecretKey key;
@@ -29,9 +31,13 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateAccessToken(String userId) {
+    public String generateAccessToken(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("typeOfUser", user.getTypeOfUser().name());
+
         return Jwts.builder()
-                .setSubject(userId)
+                .setClaims(claims)
+                .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(key)
@@ -39,9 +45,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateRefreshToken(String userId) {
+    public String generateRefreshToken(User user) {
         return Jwts.builder()
-                .setSubject(userId)
+                .setSubject(String.valueOf(user.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(key)
@@ -51,12 +57,16 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
+            var claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
         }
-
     }
 
     @Override

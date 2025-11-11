@@ -1,12 +1,14 @@
 package com.iot.alertavital.iam.interfaces.rest.transform;
 
 
-import com.iot.alertavital.iam.domain.model.commands.SignUpCommand;
-import com.iot.alertavital.iam.interfaces.rest.resources.RegisterRequestResource;
+import com.iot.alertavital.iam.domain.model.commands.SignUpCaregiverCommand;
+import com.iot.alertavital.iam.domain.model.commands.SignUpPatientCommand;
+import com.iot.alertavital.iam.interfaces.rest.resources.CaregiverRegisterRequestResource;
+import com.iot.alertavital.iam.interfaces.rest.resources.PatientRegisterRequestResource;
 
 public class SignUpCommandFromResourceAssembler {
-    public static SignUpCommand toCommandFromResource(RegisterRequestResource resource) {
-        return new SignUpCommand(
+    public static SignUpPatientCommand toCommandFromPatientResource(PatientRegisterRequestResource resource) {
+        return new SignUpPatientCommand(
                 resource.firstName(),
                 resource.lastName(),
                 resource.email(),
@@ -14,6 +16,18 @@ public class SignUpCommandFromResourceAssembler {
                 resource.username(),
                 resource.password(),
                 resource.birthday()
+        );
+    }
+
+    public static SignUpCaregiverCommand toCommandFromCaregiverResource(CaregiverRegisterRequestResource resource) {
+        return new SignUpCaregiverCommand(
+                resource.firstName(),
+                resource.lastName(),
+                resource.email(),
+                resource.gender(),
+                resource.username(),
+                resource.password(),
+                resource.phoneNumber()
         );
     }
 }
