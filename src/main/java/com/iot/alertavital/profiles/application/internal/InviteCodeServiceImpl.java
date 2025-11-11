@@ -11,6 +11,7 @@ import com.iot.alertavital.profiles.infrastructure.repositories.PatientRepositor
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -37,6 +38,10 @@ public class InviteCodeServiceImpl implements InviteCodeService {
 
         Long userId = authenticatedUserProvider.getCurrentUserId();
 
+        if (!Objects.equals(authenticatedUserProvider.getCurrentUserType(), "PATIENT")){
+            throw new IllegalStateException("Only PATIENT users are allowed to invite code");
+        }
+
         var patient = patientRepo.findByUser_Id(userId).orElseThrow(() -> new IllegalArgumentException("Patient does not exist"));
 
         String code = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
@@ -55,7 +60,13 @@ public class InviteCodeServiceImpl implements InviteCodeService {
     public String useCode(String code) {
 
         Long userId = authenticatedUserProvider.getCurrentUserId();
-        var caregiver = caregiverRepo.findByUser_Id(userId).orElseThrow(() -> new IllegalArgumentException("Patient does not exist"));
+
+        if (!Objects.equals(authenticatedUserProvider.getCurrentUserType(), "CAREGIVER")){
+            throw new IllegalStateException("Only CAREGIVER users are allowed to use code");
+        }
+
+
+        var caregiver = caregiverRepo.findByUser_Id(userId).orElseThrow(() -> new IllegalArgumentException("Caregiver does not exist"));
 
 
         PatientInviteCode invite = inviteRepo.findByCodeAndUsedFalse(code)
