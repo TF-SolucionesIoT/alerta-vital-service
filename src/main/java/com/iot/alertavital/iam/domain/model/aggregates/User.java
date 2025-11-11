@@ -51,6 +51,8 @@ public class User extends AuditableAbstractAggregateRoot<User> implements UserDe
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Patient patient;
 
+
+
     public User(){}
 
 
