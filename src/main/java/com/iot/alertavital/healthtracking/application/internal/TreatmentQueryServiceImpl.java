@@ -9,6 +9,7 @@ import com.iot.alertavital.profiles.infrastructure.repositories.PatientRepositor
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TreatmentQueryServiceImpl implements TreatmentQueryService {
@@ -27,6 +28,10 @@ public class TreatmentQueryServiceImpl implements TreatmentQueryService {
     @Override
     public List<Treatments> handle(GetAllTreatmentsByPatientIdQuery query) {
         Long userId = authenticatedUserProvider.getCurrentUserId();
+
+        if (!Objects.equals(authenticatedUserProvider.getCurrentUserType(), "PATIENT")){
+            throw new IllegalArgumentException("Only PATIENT users are allowed");
+        }
 
         return treatmentsRepository.findAllByPatient_User_IdOrderByStartDateDesc(userId);
     }
