@@ -5,8 +5,10 @@ import com.iot.alertavital.profiles.domain.model.commands.CreateCaregiverCommand
 import com.iot.alertavital.profiles.domain.model.valueobjects.PhoneNumber;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Caregiver extends AuditableAbstractAggregateRoot<Caregiver> {
 
     @OneToOne(cascade = CascadeType.ALL)
