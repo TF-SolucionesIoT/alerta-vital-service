@@ -3,6 +3,7 @@ package com.iot.alertavital.iam.interfaces.rest;
 import com.iot.alertavital.iam.application.internal.services.AuthService;
 import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.iam.infrastructure.repositories.UserRepository;
+import com.iot.alertavital.iam.infrastructure.security.CustomUserPrincipal;
 import com.iot.alertavital.iam.interfaces.rest.resources.*;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInResultToResponseAssembler;
@@ -81,11 +82,27 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     public ResponseEntity<UserProfileResource> getCurrentUserProfile(Authentication authentication) {
-        // Obtener el ID del usuario desde el token JWT (almacenado en el subject)
-        String userId = authentication.getName();
+        // Obtener el ID del usuario desde el CustomUserPrincipal
+        Long userId;
+        
+        if (authentication.getPrincipal() instanceof CustomUserPrincipal principal) {
+            userId = principal.getId();
+        } else {
+            // Fallback: intentar parsear desde el nombre (para compatibilidad)
+            try {
+                userId = Long.parseLong(authentication.getName());
+            } catch (NumberFormatException e) {
+                throw new RuntimeException("Could not extract user ID from authentication");
+            }
+        }
+        
+        // Validar que el userId no sea null
+        if (userId == null) {
+            throw new RuntimeException("User ID cannot be null");
+        }
         
         // Buscar el usuario en la base de datos
-        User user = userRepository.findById(Long.parseLong(userId))
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         
         // Buscar el Patient o Caregiver asociado
