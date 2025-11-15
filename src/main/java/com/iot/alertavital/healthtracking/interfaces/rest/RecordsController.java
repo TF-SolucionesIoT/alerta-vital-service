@@ -6,12 +6,14 @@ import com.iot.alertavital.healthtracking.domain.model.commands.DeleteSymptonCom
 import com.iot.alertavital.healthtracking.domain.model.queries.GetAllDisturbancesByPatientIdQuery;
 import com.iot.alertavital.healthtracking.domain.model.queries.GetAllSymptonsByPatientIdQuery;
 import com.iot.alertavital.healthtracking.domain.model.queries.GetAllTreatmentsByPatientIdQuery;
+import com.iot.alertavital.healthtracking.domain.model.queries.GetPatientHealthRecordsByPatientIdQuery;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceCommandService;
 import com.iot.alertavital.healthtracking.domain.services.DisturbanceQueryService;
 import com.iot.alertavital.healthtracking.domain.services.SymptonCommandService;
 import com.iot.alertavital.healthtracking.domain.services.SymptonQueryService;
 import com.iot.alertavital.healthtracking.domain.services.TreatmentCommandService;
 import com.iot.alertavital.healthtracking.domain.services.TreatmentQueryService;
+import com.iot.alertavital.healthtracking.domain.services.PatientHealthRecordsQueryService;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateDisturbanceRequest;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateDisturbanceResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateSymptonRequest;
@@ -21,6 +23,7 @@ import com.iot.alertavital.healthtracking.interfaces.rest.resources.CreateTreatm
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.GetAllDisturbanceByPatientResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.GetAllSymptonByPatientResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.resources.GetAllTreatmentByPatientResponse;
+import com.iot.alertavital.healthtracking.interfaces.rest.resources.PatientHealthRecordsResponse;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateDisturbanceCommandFromResourceAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateDisturbanceResponseFromEntityAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateSymptonCommandFromResourceAssembler;
@@ -30,6 +33,7 @@ import com.iot.alertavital.healthtracking.interfaces.rest.transform.CreateTreatm
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.DisturbanceResourceFromEntityAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.SymptonResourceFromEntityAssembler;
 import com.iot.alertavital.healthtracking.interfaces.rest.transform.TreatmentResourceFromEntityAssembler;
+import com.iot.alertavital.healthtracking.interfaces.rest.transform.PatientHealthRecordsAssembler;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
@@ -46,13 +50,16 @@ public class RecordsController {
     private final SymptonQueryService symptonQueryService;
     private final TreatmentCommandService treatmentCommandService;
     private final TreatmentQueryService treatmentQueryService;
-    public RecordsController(DisturbanceCommandService disturbanceCommandService, DisturbanceQueryService disturbanceQueryService, SymptonCommandService symptonCommandService, SymptonQueryService symptonQueryService, TreatmentCommandService treatmentCommandService, TreatmentQueryService treatmentQueryService) {
+    private final PatientHealthRecordsQueryService patientHealthRecordsQueryService;
+    
+    public RecordsController(DisturbanceCommandService disturbanceCommandService, DisturbanceQueryService disturbanceQueryService, SymptonCommandService symptonCommandService, SymptonQueryService symptonQueryService, TreatmentCommandService treatmentCommandService, TreatmentQueryService treatmentQueryService, PatientHealthRecordsQueryService patientHealthRecordsQueryService) {
         this.disturbanceCommandService = disturbanceCommandService;
         this.disturbanceQueryService = disturbanceQueryService;
         this.symptonCommandService = symptonCommandService;
         this.symptonQueryService = symptonQueryService;
         this.treatmentCommandService = treatmentCommandService;
         this.treatmentQueryService = treatmentQueryService;
+        this.patientHealthRecordsQueryService = patientHealthRecordsQueryService;
     }
 
     @PostMapping("/disturbances")
@@ -175,5 +182,18 @@ public class RecordsController {
         var resources = list.stream().map(TreatmentResourceFromEntityAssembler::toResource).toList();
 
         return ResponseEntity.ok(resources);
+    }
+
+    @GetMapping("/patient/{patientId}")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Patient health records found"),
+            @ApiResponse(responseCode = "403", description = "Caregiver does not have access to this patient"),
+            @ApiResponse(responseCode = "404", description = "Patient not found")
+    })
+    public ResponseEntity<PatientHealthRecordsResponse> getPatientHealthRecords(@PathVariable Long patientId) {
+        var query = new GetPatientHealthRecordsByPatientIdQuery(patientId);
+        var records = patientHealthRecordsQueryService.handle(query);
+        var response = PatientHealthRecordsAssembler.toResponse((java.util.Map<String, Object>) records);
+        return ResponseEntity.ok(response);
     }
 }
