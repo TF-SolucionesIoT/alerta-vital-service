@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     boolean existsByDeviceId(String deviceId);
+    Device findByDeviceId(String deviceId);
 }

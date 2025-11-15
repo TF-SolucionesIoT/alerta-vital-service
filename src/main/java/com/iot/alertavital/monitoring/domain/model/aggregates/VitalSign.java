@@ -4,11 +4,15 @@ import com.iot.alertavital.monitoring.domain.model.valueobjects.Bpm;
 import com.iot.alertavital.monitoring.domain.model.valueobjects.Spo2;
 import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
 @Entity
 public class VitalSign extends AuditableAbstractAggregateRoot<VitalSign> {
+
+    @NotBlank
+    private String deviceId;
 
     @Embedded
     @AttributeOverrides({
