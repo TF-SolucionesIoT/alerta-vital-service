@@ -11,8 +11,8 @@ import com.iot.alertavital.profiles.infrastructure.repositories.PatientRepositor
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class InviteCodeServiceImpl implements InviteCodeService {
@@ -80,6 +80,13 @@ public class InviteCodeServiceImpl implements InviteCodeService {
             throw new RuntimeException("Access already exists.");
         }
 
+        // Obtener información del paciente para el mensaje de respuesta
+        var patient = patientRepo.findById(invite.getPatientId())
+                .orElseThrow(() -> new IllegalArgumentException("Patient does not exist"));
+        
+        var patientUser = patient.getUser();
+        String patientName = patientUser.getName().firstName() + " " + patientUser.getName().lastName();
+
         CaregiverPatientAccess access = new CaregiverPatientAccess();
         access.setCaregiverId(caregiver.getId());
         access.setPatientId(invite.getPatientId());
@@ -89,6 +96,36 @@ public class InviteCodeServiceImpl implements InviteCodeService {
         invite.setUsed(true);
         inviteRepo.save(invite);
 
-        return "Access granted successfully.";
+        return "Enlazado exitosamente con el paciente: " + patientName;
+    }
+
+    @Override
+    public List<Map<String, Object>> getLinkedPatients() {
+        Long userId = authenticatedUserProvider.getCurrentUserId();
+
+        if (!Objects.equals(authenticatedUserProvider.getCurrentUserType(), "CAREGIVER")){
+            throw new IllegalStateException("Only CAREGIVER users are allowed to view linked patients");
+        }
+
+        var caregiver = caregiverRepo.findByUser_Id(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Caregiver does not exist"));
+
+        List<CaregiverPatientAccess> accesses = accessRepo.findByCaregiverId(caregiver.getId());
+
+        return accesses.stream().map(access -> {
+            var patient = patientRepo.findById(access.getPatientId())
+                    .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+            var patientUser = patient.getUser();
+            
+            Map<String, Object> patientInfo = new HashMap<>();
+            patientInfo.put("patientId", patient.getId());
+            patientInfo.put("firstName", patientUser.getName().firstName());
+            patientInfo.put("lastName", patientUser.getName().lastName());
+            patientInfo.put("username", patientUser.getUsername());
+            patientInfo.put("email", patientUser.getEmail().address());
+            patientInfo.put("grantedDate", access.getGrantedDate());
+            
+            return patientInfo;
+        }).collect(Collectors.toList());
     }
 }

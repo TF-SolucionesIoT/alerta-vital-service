@@ -4,11 +4,13 @@ import com.iot.alertavital.shared.domain.model.aggregates.AuditableAbstractAggre
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 @Setter
 @Table(name = "caregiver_patient_access")
 public class CaregiverPatientAccess extends AuditableAbstractAggregateRoot<CaregiverPatientAccess> {

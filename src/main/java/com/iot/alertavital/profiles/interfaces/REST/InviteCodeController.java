@@ -3,11 +3,9 @@ package com.iot.alertavital.profiles.interfaces.REST;
 import com.iot.alertavital.profiles.domain.model.entities.PatientInviteCode;
 import com.iot.alertavital.profiles.domain.services.InviteCodeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,5 +33,12 @@ public class InviteCodeController {
     public ResponseEntity<?> useCode(@PathVariable String code) {
         String message = inviteCodeService.useCode(code);
         return ResponseEntity.ok(Map.of("message", message));
+    }
+
+    // Obtener pacientes enlazados (caregiver)
+    @GetMapping("/linked-patients")
+    public ResponseEntity<?> getLinkedPatients() {
+        List<Map<String, Object>> patients = inviteCodeService.getLinkedPatients();
+        return ResponseEntity.ok(patients);
     }
 }
