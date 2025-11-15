@@ -23,8 +23,7 @@ public class Contact extends AuditableAbstractAggregateRoot<Contact> {
     private String connection;
 
     @Embedded
-    @NotBlank
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private PhoneNumber phoneNumber;
 
     @Setter
