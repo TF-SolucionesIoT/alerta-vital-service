@@ -3,6 +3,7 @@ package com.iot.alertavital.iam.interfaces.rest;
 import com.iot.alertavital.iam.application.internal.services.AuthService;
 import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.iam.infrastructure.repositories.UserRepository;
+import com.iot.alertavital.iam.infrastructure.security.AuthenticatedUserProvider;
 import com.iot.alertavital.iam.interfaces.rest.resources.*;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
 import com.iot.alertavital.iam.interfaces.rest.transform.SignInResultToResponseAssembler;
@@ -72,9 +73,9 @@ public class AuthController {
     }
 
     /**
-     * Endpoint para obtener el perfil del usuario autenticado
-     * Devuelve información completa del usuario incluyendo datos de Patient o Caregiver
-     */
+     *      * Endpoint para obtener el perfil del usuario autenticado
+     *      * Devuelve información completa del usuario incluyendo datos de Patient o Caregiver
+     *      */
     @GetMapping("/profile/me")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
@@ -82,11 +83,13 @@ public class AuthController {
     })
     public ResponseEntity<UserProfileResource> getCurrentUserProfile(Authentication authentication) {
         // Obtener el ID del usuario desde el token JWT (almacenado en el subject)
-        String userId = authentication.getName();
-        
+
+        AuthenticatedUserProvider provider = new AuthenticatedUserProvider();
+
+        Long userId = provider.getCurrentUserId();
+
         // Buscar el usuario en la base de datos
-        User user = userRepository.findById(Long.parseLong(userId))
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        var user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         
         // Buscar el Patient o Caregiver asociado
         Patient patient = patientRepository.findByUser_Id(user.getId()).orElse(null);
