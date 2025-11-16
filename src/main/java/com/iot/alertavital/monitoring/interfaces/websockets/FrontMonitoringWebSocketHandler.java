@@ -24,8 +24,15 @@ public class FrontMonitoringWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         logger.info("Frontend conectado: {}", session.getId());
+
+        Long userId = (Long) session.getAttributes().get("userId");
+        String userType = (String) session.getAttributes().get("userType");
+        Long patientId = (Long) session.getAttributes().get("patientId");
+
         broadcastService.registerSession(session);
+        broadcastService.setUserForSession(session, userId, patientId, userType);
     }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
