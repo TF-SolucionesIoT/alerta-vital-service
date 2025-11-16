@@ -2,12 +2,9 @@ package com.iot.alertavital.monitoring.interfaces.websockets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iot.alertavital.monitoring.application.internal.outboundservices.RealTimeBroadcastService;
-import com.iot.alertavital.monitoring.domain.model.aggregates.Device;
-import com.iot.alertavital.monitoring.domain.model.commands.RecordVitalSignsCommand;
 import com.iot.alertavital.monitoring.domain.model.queries.GetDeviceByIdQuery;
 import com.iot.alertavital.monitoring.domain.services.DeviceQueryService;
 import com.iot.alertavital.monitoring.interfaces.REST.resources.VitalSignRequest;
-import com.iot.alertavital.profiles.domain.model.aggregates.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,7 +33,8 @@ public class DataWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        logger.info("Cliente conectado: {}", session.getId());
+        String token = (String) session.getAttributes().get("token");
+        logger.info("Cliente conectado | Token: {}", token);
 
     }
 
@@ -57,21 +55,26 @@ public class DataWebSocketHandler extends TextWebSocketHandler {
             }
 
             var device = deviceOpt.get();
-            var user = device.getPatient().getUser().getId();
+            var userId = device.getPatient().getUser().getId();
+            var patientId = device.getPatient().getId();
+
 
             Map<String, Object> message_to_frontend = new HashMap<>();
-
-            message_to_frontend.put("user_id", user);
+            message_to_frontend.put("user_id", userId);
+            message_to_frontend.put("patient_id", patientId);
             message_to_frontend.put("bpm", dto.bpm());
             message_to_frontend.put("spo2", dto.spo2());
 
 
             //var command = new RecordVitalSignsCommand(dto.bpm(), dto.spo2());
             //recordService.handle(command);
-
+            logger.info("ID DEL PACIENTE : {}", patientId);
 
             //send to front end
-            realTimeBroadcastService.broadcast(mapper.writeValueAsString(message_to_frontend));
+            realTimeBroadcastService.broadcast(
+                    patientId,
+                    mapper.writeValueAsString(message_to_frontend)
+            );
 
 
         } catch (Exception e) {
@@ -83,6 +86,7 @@ public class DataWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, org.springframework.web.socket.CloseStatus status) throws Exception {
+        realTimeBroadcastService.removeSession(session);
         logger.info("Cliente desconectado: " + session.getId() + " con estado " + status);
 
     }

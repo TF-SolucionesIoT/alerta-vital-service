@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new AuthResponseResult(accessToken, refreshToken);
+        return new AuthResponseResult(accessToken, refreshToken, user.getId(), user.getTypeOfUser().name());
     }
 
     @Override

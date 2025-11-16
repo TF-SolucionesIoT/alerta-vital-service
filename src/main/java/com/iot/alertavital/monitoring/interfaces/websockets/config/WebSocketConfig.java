@@ -12,18 +12,26 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
+    private final WebSocketAuthInterceptor authInterceptor;
     private final DataWebSocketHandler dataHandler;
-    private final FrontMonitoringWebSocketHandler frontMonitoringWebSocketHandlerhandler;
+    private final FrontMonitoringWebSocketHandler frontMonitoringWebSocketHandler;
 
-    public WebSocketConfig(DataWebSocketHandler dataHandler, FrontMonitoringWebSocketHandler frontMonitoringWebSocketHandlerhandler) {
+    public WebSocketConfig(WebSocketAuthInterceptor authInterceptor, DataWebSocketHandler dataHandler, FrontMonitoringWebSocketHandler frontMonitoringWebSocketHandler) {
+        this.authInterceptor = authInterceptor;
         this.dataHandler = dataHandler;
-        this.frontMonitoringWebSocketHandlerhandler = frontMonitoringWebSocketHandlerhandler;
+        this.frontMonitoringWebSocketHandler = frontMonitoringWebSocketHandler;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(dataHandler, "/ws/edge").setAllowedOrigins("*");
-        registry.addHandler(frontMonitoringWebSocketHandlerhandler, "/ws/monitoring").setAllowedOrigins("*");
+        System.out.println("WebSocketConfig CARGADO");
+
+        registry.addHandler(dataHandler, "/ws/edge")
+                .setAllowedOrigins("*");
+
+        registry.addHandler(frontMonitoringWebSocketHandler, "/ws/monitoring")
+                .addInterceptors(authInterceptor)
+                .setAllowedOrigins("*");
     }
 
 }

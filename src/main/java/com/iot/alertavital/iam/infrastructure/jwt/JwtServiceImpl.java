@@ -78,4 +78,10 @@ public class JwtServiceImpl implements JwtService {
                 .getBody()
                 .getSubject();
     }
+
+    @Override
+    public SecretKey getKey() {
+        return this.key;
+    }
+
 }
