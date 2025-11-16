@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
-    @Getter
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
@@ -30,7 +30,6 @@ public class Patient extends AuditableAbstractAggregateRoot<Patient> {
     private Birthday birthday;
 
 
-    @Getter
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Disturbance> disturbances = new ArrayList<>();
 
