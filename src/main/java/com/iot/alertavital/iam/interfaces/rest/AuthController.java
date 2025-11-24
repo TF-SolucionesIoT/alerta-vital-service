@@ -81,9 +81,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<UserProfileResource> getCurrentUserProfile(Authentication authentication) {
-        // Obtener el ID del usuario desde el token JWT (almacenado en el subject)
-
+    public ResponseEntity<UserProfileResource> getCurrentUserProfile() {
         AuthenticatedUserProvider provider = new AuthenticatedUserProvider();
 
         Long userId = provider.getCurrentUserId();
