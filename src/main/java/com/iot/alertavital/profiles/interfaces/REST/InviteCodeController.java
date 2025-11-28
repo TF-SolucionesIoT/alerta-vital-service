@@ -33,7 +33,7 @@ public class InviteCodeController {
     // Usar código (caregiver)
     @PostMapping("/use/{code}")
     public ResponseEntity<?> useCode(@PathVariable String code) {
-        String message = inviteCodeService.useCode(code);
-        return ResponseEntity.ok(Map.of("message", message));
+        Map<String, Object> response = inviteCodeService.useCode(code);
+        return ResponseEntity.ok(response);
     }
 }
