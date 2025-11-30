@@ -7,6 +7,6 @@ import com.iot.alertavital.iam.interfaces.rest.resources.RegisterResponseResourc
 
 public class SignUpResultToResponseAssembler {
     public static RegisterResponseResource fromResultToResponse(RegisterResponseResult authResponseResult) {
-        return new RegisterResponseResource(authResponseResult.accessToken(), authResponseResult.refreshToken(), authResponseResult.username());
+        return new RegisterResponseResource(authResponseResult.accessToken(), authResponseResult.refreshToken(), authResponseResult.userId(), authResponseResult.typeOfUser(), authResponseResult.fullName());
     }
 }
