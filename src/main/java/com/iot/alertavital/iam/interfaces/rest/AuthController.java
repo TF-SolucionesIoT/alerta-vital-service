@@ -1,7 +1,6 @@
 package com.iot.alertavital.iam.interfaces.rest;
 
 import com.iot.alertavital.iam.application.internal.services.AuthService;
-import com.iot.alertavital.iam.domain.model.aggregates.User;
 import com.iot.alertavital.iam.infrastructure.repositories.UserRepository;
 import com.iot.alertavital.iam.infrastructure.security.AuthenticatedUserProvider;
 import com.iot.alertavital.iam.interfaces.rest.resources.*;
@@ -18,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
