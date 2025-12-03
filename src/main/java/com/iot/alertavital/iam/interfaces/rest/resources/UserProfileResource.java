@@ -15,6 +15,8 @@ public record UserProfileResource(
     String gender,
     String phoneNumber,
     LocalDate birthday,
-    String typeOfUser
+    String typeOfUser,
+    Long patientId,    // ID de la tabla patient (solo para usuarios tipo PATIENT)
+    Long caregiverId   // ID de la tabla caregiver (solo para usuarios tipo CAREGIVER)
 ) {
 }

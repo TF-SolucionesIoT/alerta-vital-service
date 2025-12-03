@@ -11,6 +11,7 @@ import com.iot.alertavital.profiles.infrastructure.repositories.PatientRepositor
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public class InviteCodeServiceImpl implements InviteCodeService {
 
 
     @Override
-    public String useCode(String code) {
+    public Map<String, Object> useCode(String code) {
 
         Long userId = authenticatedUserProvider.getCurrentUserId();
 
@@ -89,6 +90,9 @@ public class InviteCodeServiceImpl implements InviteCodeService {
         invite.setUsed(true);
         inviteRepo.save(invite);
 
-        return "Access granted successfully.";
+        return Map.of(
+            "message", "Access granted successfully.",
+            "patientId", invite.getPatientId()
+        );
     }
 }

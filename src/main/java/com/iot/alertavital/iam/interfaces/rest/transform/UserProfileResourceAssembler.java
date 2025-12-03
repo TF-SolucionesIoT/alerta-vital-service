@@ -16,15 +16,23 @@ public class UserProfileResourceAssembler {
     public static UserProfileResource toResourceFromEntity(User user, Patient patient, Caregiver caregiver) {
         String phoneNumber = null;
         LocalDate birthday = null;
+        Long patientId = null;
+        Long caregiverId = null;
 
-        // Obtener birthday de Patient
-        if (patient != null && patient.getBirthday() != null) {
-            birthday = patient.getBirthday().birthday();
+        // Obtener birthday y patientId de Patient
+        if (patient != null) {
+            patientId = patient.getId();
+            if (patient.getBirthday() != null) {
+                birthday = patient.getBirthday().birthday();
+            }
         }
         
-        // Obtener phoneNumber de Caregiver
-        if (caregiver != null && caregiver.getPhoneNumber() != null) {
-            phoneNumber = caregiver.getPhoneNumber().number();
+        // Obtener phoneNumber y caregiverId de Caregiver
+        if (caregiver != null) {
+            caregiverId = caregiver.getId();
+            if (caregiver.getPhoneNumber() != null) {
+                phoneNumber = caregiver.getPhoneNumber().number();
+            }
         }
 
         return new UserProfileResource(
@@ -36,7 +44,9 @@ public class UserProfileResourceAssembler {
             user.getGender().name(),
             phoneNumber,
             birthday,
-            user.getTypeOfUser().name()
+            user.getTypeOfUser().name(),
+            patientId,
+            caregiverId
         );
     }
 }
