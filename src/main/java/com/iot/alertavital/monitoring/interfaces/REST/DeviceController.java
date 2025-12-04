@@ -1,15 +1,15 @@
 package com.iot.alertavital.monitoring.interfaces.REST;
 
 
+import com.iot.alertavital.monitoring.domain.model.commands.CreateAlertCommand;
+import com.iot.alertavital.monitoring.domain.model.queries.GetAllAlertsByDescQuery;
 import com.iot.alertavital.monitoring.domain.model.queries.GetAllReadingByDescQuery;
 import com.iot.alertavital.monitoring.domain.services.DeviceCommandService;
 import com.iot.alertavital.monitoring.domain.services.ReadingDeviceQueryService;
-import com.iot.alertavital.monitoring.infrastructure.repositories.DeviceRepository;
-import com.iot.alertavital.monitoring.interfaces.REST.resources.CreateDeviceRequest;
-import com.iot.alertavital.monitoring.interfaces.REST.resources.CreateDeviceResponse;
-import com.iot.alertavital.monitoring.interfaces.REST.resources.GetAllReadingByDescResponse;
+import com.iot.alertavital.monitoring.interfaces.REST.resources.*;
 import com.iot.alertavital.monitoring.interfaces.REST.transform.CreateDeviceCommandFromResourceAssembler;
 import com.iot.alertavital.monitoring.interfaces.REST.transform.DeviceResourceFromEntityAssembler;
+import com.iot.alertavital.monitoring.interfaces.REST.transform.ReadingAlertResourceFromEntityAssembler;
 import com.iot.alertavital.monitoring.interfaces.REST.transform.ReadingDeviceResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/device")
@@ -60,6 +61,32 @@ public class DeviceController {
         return ResponseEntity.status(200).body(resource);
 
     }
+
+    @GetMapping("/reading-alerts/all")
+    public ResponseEntity<List<GetAllAlertsByDescResponse>> getAllReadingAlertsByDescResponse() {
+        var list = readingDeviceQueryService.handle(new GetAllAlertsByDescQuery());
+        if (list.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        var resource = list.stream().map(ReadingAlertResourceFromEntityAssembler::toResource).
+                toList();
+        return ResponseEntity.status(200).body(resource);
+    }
+
+
+    @PostMapping("/emmit-alert")
+    public ResponseEntity<Optional<?>> emmitAlert(@RequestBody CreateAlertRequest request) {
+        var optionalResponse = deviceCommandService.handle(new CreateAlertCommand(request.deviceId(), request.dateTime()));
+        if (optionalResponse.isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+        //map to json response
+        var response = optionalResponse.get();
+        return ResponseEntity.status(201).body(Optional.of(response));
+    }
+
+
 
 
 }
