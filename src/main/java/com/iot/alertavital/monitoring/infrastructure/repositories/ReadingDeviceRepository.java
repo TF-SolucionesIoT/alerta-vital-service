@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ReadingDeviceRepository extends JpaRepository<ReadingDevice, Long> {
     List<ReadingDevice> findAllByDevice_Patient_IdOrderByCreatedAtDesc(Long patientId);
+
 }
