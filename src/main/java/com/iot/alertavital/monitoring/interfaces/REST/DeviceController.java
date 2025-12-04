@@ -62,7 +62,7 @@ public class DeviceController {
 
     }
 
-    @GetMapping("reading-alerts/all")
+    @GetMapping("/reading-alerts/all")
     public ResponseEntity<List<GetAllAlertsByDescResponse>> getAllReadingAlertsByDescResponse() {
         var list = readingDeviceQueryService.handle(new GetAllAlertsByDescQuery());
         if (list.isEmpty()) {
