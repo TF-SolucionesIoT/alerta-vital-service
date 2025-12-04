@@ -64,6 +64,8 @@ public class DataWebSocketHandler extends TextWebSocketHandler {
             message_to_frontend.put("patient_id", patientId);
             message_to_frontend.put("bpm", dto.bpm());
             message_to_frontend.put("spo2", dto.spo2());
+            message_to_frontend.put("bp_systolic", dto.bpSystolic());
+            message_to_frontend.put("bp_diastolic", dto.bpDiastolic());
 
 
             //var command = new RecordVitalSignsCommand(dto.bpm(), dto.spo2());
