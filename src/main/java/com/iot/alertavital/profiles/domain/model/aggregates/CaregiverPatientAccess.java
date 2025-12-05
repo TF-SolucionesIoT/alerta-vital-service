@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "caregiver_patient_accesses")
 public class CaregiverPatientAccess extends AuditableAbstractAggregateRoot<CaregiverPatientAccess> {
 
+    @Getter
     @Column(nullable = false)
     private Long caregiverId;
 

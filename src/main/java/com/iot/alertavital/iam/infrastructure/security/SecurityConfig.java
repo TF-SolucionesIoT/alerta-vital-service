@@ -46,8 +46,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
 
-        // ⚠️ Debe tener tu frontend explícitamente
         config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://front-end-iot-smoky.vercel.app");
 
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");

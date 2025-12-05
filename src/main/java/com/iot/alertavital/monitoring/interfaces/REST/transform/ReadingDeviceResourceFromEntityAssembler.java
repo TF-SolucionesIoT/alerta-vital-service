@@ -8,8 +8,10 @@ public class ReadingDeviceResourceFromEntityAssembler {
         return new GetAllReadingByDescResponse(
                 readingDevice.getId(),
                 readingDevice.getSpO2(),
-                readingDevice.getPulse(),
-                readingDevice.getTimestamp()
+                readingDevice.getBpm(),
+                readingDevice.getBpDiastolic(),
+                readingDevice.getBpSystolic(),
+                readingDevice.getCreatedAt()
         );
 
     }
